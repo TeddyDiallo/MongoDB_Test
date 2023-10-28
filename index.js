@@ -12,12 +12,18 @@ const server = http.createServer((req, res) => {
     parsedReq.headers = req.headers;
     parsedReq.queryStringObject = parsedReq.parsedUrl.query;
 
-    res.end (`
-    Path: ${parsedReq.path}
-    Trimmed Path: ${parsedReq.trimmedPath}
-    Method: ${parsedReq.method}
-    Headers: \n${JSON.stringify(parsedReq.headers, null, 2)}
-    Query Object: \n${JSON.stringify(parsedReq.queryStringObject, null, 2)}
-    `)
+    let body = [];
+
+    req.on('data', (chunck) => {
+        body.push(chunck);
+    });
+
+    req.on('end', () => {
+        body = Buffer.concat(body).toString();
+        parsedReq.body = body;
+
+        res.end (parsedReq.body);
+    });
+
 }); 
 server.listen(3000, () => console.log('Listening on port 3000...'));
