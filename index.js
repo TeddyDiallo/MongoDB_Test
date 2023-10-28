@@ -1,6 +1,21 @@
 const http = require('http');
 const url = require('url');
 
+const handlers = {};
+
+handlers.newbies = (res) => {
+    res.end('Hello newbies Route');
+};
+
+handlers.notFound = (res) => {
+    res.writeHead(404);
+    res.end('Route does not exist...');
+};
+
+const router = {
+    'newbies' : handlers.newbies
+};
+
 const server = http.createServer((req, res) => {
 
     const parsedReq = {};
@@ -22,8 +37,9 @@ const server = http.createServer((req, res) => {
         body = Buffer.concat(body).toString();
         parsedReq.body = body;
 
-        res.end (parsedReq.body);
-    });
+        const routedHandler = typeof(router[parsedReq.trimmedPath]) !== 'undefined' ? router[parsedReq.trimmedPath] : handlers.notFound;
 
+        routedHandler(res);
+    });
 }); 
 server.listen(3000, () => console.log('Listening on port 3000...'));
